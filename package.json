@@ -1,0 +1,23 @@
+{
+  "name": "pi-context",
+  "version": "0.1.0",
+  "description": "Tiny XML-ish context envelope helpers for Pi extensions.",
+  "type": "module",
+  "license": "MIT",
+  "author": "sshkeda",
+  "keywords": ["pi", "pi-extension", "context", "xml-ish", "llm"],
+  "exports": {
+    ".": {
+      "types": "./index.ts",
+      "default": "./index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck && node --test test/*.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}
