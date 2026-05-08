@@ -1,19 +1,29 @@
 {
   "name": "pi-context",
   "version": "0.1.0",
-  "private": true,
   "description": "Tiny XML-ish context envelope helpers for Pi extensions.",
   "type": "module",
   "license": "MIT",
-  "author": "sshkeda",
-  "keywords": ["pi", "pi-extension", "context", "xml-ish", "llm"],
+  "author": "Stephen Shkeda",
+  "keywords": [
+    "pi",
+    "pi-extension",
+    "context",
+    "xml-ish",
+    "llm",
+    "agent-context",
+    "transcript"
+  ],
   "exports": {
     ".": {
       "types": "./index.ts",
       "default": "./index.ts"
     }
   },
-  "files": ["index.ts", "README.md"],
+  "files": [
+    "index.ts",
+    "README.md"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "npm run typecheck && node --test test/*.mjs"
@@ -21,5 +31,9 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sshkeda/pi-context.git"
   }
 }
