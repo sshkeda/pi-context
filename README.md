@@ -1,6 +1,8 @@
 # pi-context
 
-Tiny XML-ish context envelope helpers for Pi extensions and cross-provider transcript adapters.
+Tiny XML-ish context envelope helpers for Pi extensions, LLM tool results, and cross-provider agent transcripts.
+
+Use `pi-context` when a Pi extension needs to inject model-visible context with stable provenance, sparse metadata, safe escaping, and human-readable transcript formatting.
 
 ## Canonical envelope
 
@@ -76,6 +78,18 @@ Callers should distinguish:
 - **lossless storage/provenance**: native logs, JSONL, sidecars, temp files.
 - **model-visible context**: may be redacted/truncated, but must say so.
 
+## Install
+
+Use as a GitHub dependency from another Pi package:
+
+```json
+{
+  "dependencies": {
+    "pi-context": "github:sshkeda/pi-context#v0.1.1"
+  }
+}
+```
+
 ## API
 
 ```ts
@@ -114,3 +128,14 @@ piContext({
   ],
 });
 ```
+
+## Development
+
+```bash
+npm install
+npm test
+```
+
+## License
+
+MIT

@@ -1,7 +1,7 @@
 {
   "name": "pi-context",
   "version": "0.1.0",
-  "description": "Tiny XML-ish context envelope helpers for Pi extensions.",
+  "description": "Tiny XML-ish context envelope helpers for Pi extensions and agent transcripts.",
   "type": "module",
   "license": "MIT",
   "author": "Stephen Shkeda",
