@@ -2,7 +2,7 @@
 
 Tiny XML-ish context envelope helpers for Pi extensions, LLM tool results, and cross-provider agent transcripts.
 
-Use `pi-context` when a Pi extension needs to inject model-visible context with stable provenance, sparse metadata, safe escaping, and human-readable transcript formatting.
+Use `pi-context` when a Pi extension needs to inject model-visible context with stable provenance, sparse metadata, and human-readable transcript formatting.
 
 ## Canonical envelope
 
@@ -20,9 +20,7 @@ Use hyphenated `pi-context` for JavaScript/npm/GitHub naming and underscored
 
 - **Minimalism**: one stable outer wrapper, small attribute set.
 - **Consistency**: every Pi-injected context record uses `<pi_context>`.
-- **Losslessness by default**: payload text is preserved unless callers
-  explicitly redact or truncate it.
-- **Safety**: payloads cannot accidentally close their own wrapper.
+- **Losslessness**: payload text is emitted as-is.
 
 ## Envelope rules
 
@@ -59,24 +57,8 @@ schema
 This is **not strict XML**. It is stable, human/LLM-readable text.
 
 - Attribute values are XML-escaped.
-- Payload text is preserved except matching closing tags are escaped:
-  - `</pi_context>` → `<\/pi_context>`
-  - inside `<input>`, `</input>` → `<\/input>`
-  - inside `<output>`, `</output>` → `<\/output>`
-- This prevents untrusted tool output from prematurely closing context wrappers.
-
-## Truncation and redaction
-
-`pi-context` provides helpers but does not apply them automatically:
-
-- `truncateText(text, { maxChars })` appends `...[truncated N chars]` and returns metadata.
-- `redactSecrets(text)` removes obvious token/API-key shapes.
-- `sanitizeText(text, { maxChars })` redacts then truncates.
-
-Callers should distinguish:
-
-- **lossless storage/provenance**: native logs, JSONL, sidecars, temp files.
-- **model-visible context**: may be redacted/truncated, but must say so.
+- Payload text is emitted as-is.
+- `pi-context` does not parse payloads, redact payloads, truncate payloads, or rewrite closing tags.
 
 ## Install
 
@@ -85,7 +67,7 @@ Use as a GitHub dependency from another Pi package:
 ```json
 {
   "dependencies": {
-    "pi-context": "github:sshkeda/pi-context#v0.1.1"
+    "pi-context": "github:sshkeda/pi-context#v0.1.2"
   }
 }
 ```
@@ -97,9 +79,6 @@ import {
   piContext,
   section,
   stringifyPayload,
-  truncateText,
-  redactSecrets,
-  sanitizeText,
 } from "pi-context";
 ```
 

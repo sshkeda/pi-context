@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { escapeAttr, escapeClosingTags, piContext, redactSecrets, sanitizeText, section, stringifyPayload, truncateText } from "../index.ts";
+import { escapeAttr, piContext, section, stringifyPayload } from "../index.ts";
 
 test("piContext renders minimal envelope and escapes attrs", () => {
   const text = piContext({
@@ -13,38 +13,25 @@ test("piContext renders minimal envelope and escapes attrs", () => {
   assert.equal(text, '<pi_context source="pi-background-bash" kind="background_bash_result" id="bg_1" command="echo &quot;hi&quot;&#10;next" exit_code="0">\ndone\n</pi_context>');
 });
 
-test("piContext escapes closing wrapper tags in payload", () => {
-  const text = piContext({ source: "x", kind: "y", body: "before </pi_context> after" });
-  assert.match(text, /before <\\\/pi_context> after/);
-  assert.equal((text.match(/<\/pi_context>/g) ?? []).length, 1);
-});
-
-test("sections escape their own closing tags and wrapper tags", () => {
+test("sections render simple child blocks", () => {
   const text = piContext({
     source: "pi-claude-code",
     kind: "provider_tool",
     name: "Skill",
-    children: [section("input", "</input> </pi_context>"), section("output", "ok")],
+    children: [section("input", "query"), section("output", "ok")],
   });
-  assert.match(text, /<input>\n<\\\/input> <\\\/pi_context>\n<\/input>/);
-  assert.match(text, /<output>\nok\n<\/output>/);
-});
-
-test("truncate and sanitize helpers report loss", () => {
-  assert.deepEqual(truncateText("abcdef", { maxChars: 3 }), {
-    text: "abc\n...[truncated 3 chars]",
-    truncated: true,
-    originalChars: 6,
-    omittedChars: 3,
-  });
-  const sanitized = sanitizeText('{"apiKey":"sk-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}', { maxChars: 200 });
-  assert.match(sanitized.text, /\[REDACTED\]/);
-  assert.equal(sanitized.truncated, false);
+  assert.equal(text, '<pi_context source="pi-claude-code" kind="provider_tool" name="Skill">\n<input>\nquery\n</input>\n<output>\nok\n</output>\n</pi_context>');
 });
 
 test("payload and primitive escaping helpers", () => {
   assert.equal(escapeAttr('<&"\n'), '&lt;&amp;&quot;&#10;');
-  assert.equal(escapeClosingTags("</A></b>", ["a"]), "<\\/A></b>");
   assert.equal(stringifyPayload({ a: 1 }), '{\n  "a": 1\n}');
-  assert.equal(redactSecrets("token sk-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), "token [REDACTED_SECRET]");
+});
+
+test("rejects invalid tag and attribute names", () => {
+  assert.throws(() => section("bad tag", "x"), (error) => error instanceof Error && error.message.includes("Invalid section tag"));
+  assert.throws(
+    () => piContext({ source: "x", kind: "y", attrs: { "bad attr": "x" } }),
+    (error) => error instanceof Error && error.message.includes("Invalid attribute"),
+  );
 });
