@@ -58,7 +58,8 @@ This is **not strict XML**. It is stable, human/LLM-readable text.
 
 - Attribute values are XML-escaped.
 - Payload text is emitted as-is.
-- `pi-context` does not parse payloads, redact payloads, truncate payloads, or rewrite closing tags.
+- `pi-context` does not parse payloads, redact payloads, or rewrite closing tags.
+- Callers may opt into Pi's normal tool-output truncation limits for model-visible payloads.
 
 ## Install
 
@@ -67,7 +68,7 @@ Use as a GitHub dependency from another Pi package:
 ```json
 {
   "dependencies": {
-    "pi-context": "github:sshkeda/pi-context#v0.1.2"
+    "pi-context": "github:sshkeda/pi-context#v0.1.3"
   }
 }
 ```
@@ -79,6 +80,9 @@ import {
   piContext,
   section,
   stringifyPayload,
+  truncateHead,
+  truncateTail,
+  truncateContextText,
 } from "pi-context";
 ```
 
@@ -107,6 +111,22 @@ piContext({
   ],
 });
 ```
+
+### Tool-output truncation
+
+`pi-context` exports Pi's normal tool-output truncation behavior: 2000 lines or 50KB, whichever is hit first. No redaction is applied.
+
+```ts
+piContext({
+  source: "pi-background-bash",
+  kind: "background_bash_result",
+  id: "bg_1",
+  body: longOutput,
+  truncate: "tail", // or "head"
+});
+```
+
+For custom handling, call `truncateHead`, `truncateTail`, or `truncateContextText` directly.
 
 ## Development
 
