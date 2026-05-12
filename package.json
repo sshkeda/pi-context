@@ -1,6 +1,6 @@
 {
   "name": "pi-context",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Tiny XML-ish context envelope helpers for Pi extensions and agent transcripts.",
   "type": "module",
   "license": "MIT",

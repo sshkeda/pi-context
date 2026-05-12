@@ -1,6 +1,13 @@
 export type PiContextAttributeValue = string | number | boolean | null | undefined;
 export type PiContextTruncationMode = "head" | "tail";
 
+export type TruncateTextResult = {
+	text: string;
+	truncated: boolean;
+	originalChars: number;
+	omittedChars: number;
+};
+
 export type TruncationResult = {
 	content: string;
 	truncated: boolean;
@@ -48,6 +55,14 @@ export type PiContextOptions = {
 export const DEFAULT_MAX_LINES = 2000;
 export const DEFAULT_MAX_BYTES = 50 * 1024; // 50KB
 export const GREP_MAX_LINE_LENGTH = 500; // Max chars per grep match line
+
+const SECRET_PATTERNS: Array<[RegExp, string]> = [
+	[/\b(sk-[A-Za-z0-9_-]{20,})\b/g, "[REDACTED_SECRET]"],
+	[/\b(gh[pousr]_[A-Za-z0-9_]{20,})\b/g, "[REDACTED_SECRET]"],
+	[/\b(xox[baprs]-[A-Za-z0-9-]{20,})\b/g, "[REDACTED_SECRET]"],
+	[/\b([A-Za-z0-9+/]{40,}={0,2})\b/g, "[REDACTED_LONG_TOKEN]"],
+	[/("(?:api[_-]?key|token|password|secret|authorization|cookie)"\s*:\s*")([^"]+)(")/gi, "$1[REDACTED]$3"],
+];
 
 /**
  * Format bytes as human-readable size.
@@ -256,6 +271,27 @@ export function truncateLine(line: string, maxChars = GREP_MAX_LINE_LENGTH): { t
 		return { text: line, wasTruncated: false };
 	}
 	return { text: `${line.slice(0, maxChars)}... [truncated]`, wasTruncated: true };
+}
+
+export function truncateText(text: string, options: { maxChars?: number; marker?: (omittedChars: number) => string } = {}): TruncateTextResult {
+	const maxChars = options.maxChars;
+	if (maxChars === undefined || maxChars < 0 || text.length <= maxChars) {
+		return { text, truncated: false, originalChars: text.length, omittedChars: 0 };
+	}
+	const omittedChars = text.length - maxChars;
+	const marker = options.marker?.(omittedChars) ?? `\n...[truncated ${omittedChars} chars]`;
+	return { text: `${text.slice(0, maxChars)}${marker}`, truncated: true, originalChars: text.length, omittedChars };
+}
+
+export function redactSecrets(text: string): string {
+	let out = text;
+	for (const [pattern, replacement] of SECRET_PATTERNS) out = out.replace(pattern, replacement);
+	return out;
+}
+
+export function sanitizeText(text: string, options: { redact?: boolean; maxChars?: number } = {}): TruncateTextResult {
+	const redacted = options.redact === false ? text : redactSecrets(text);
+	return options.maxChars === undefined ? truncateText(redacted) : truncateText(redacted, { maxChars: options.maxChars });
 }
 
 function normalizeTruncateOptions(truncate: PiContextTruncate): Required<PiContextTruncateOptions> | undefined {
